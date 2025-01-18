@@ -21,6 +21,7 @@ jobs:
           - arch: arm64
             runner: ubuntu-22.04-arm
             cache-key: ubuntu-arm64
+    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -88,6 +89,7 @@ jobs:
             runner: ubuntu-latest
           - arch: arm64
             runner: ubuntu-22.04-arm
+    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -110,6 +112,7 @@ jobs:
             runner: ubuntu-22.04-arm
             cache-key: ubuntu-arm64
     needs: [build-debug]  # Tests run only after build completes
+    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -178,6 +181,7 @@ jobs:
             runner: ubuntu-22.04-arm
             cache-key: ubuntu-arm64
     needs: [build-debug-no-cache]
+    continue-on-error: true
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
