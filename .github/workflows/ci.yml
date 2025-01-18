@@ -215,6 +215,7 @@ jobs:
     container: rustlang/rust:nightly
     continue-on-error: true
     env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo
       RUST_BACKTRACE: "full"
     steps:
       - name: Checkout Repository
@@ -236,3 +237,45 @@ jobs:
 
       - name: Build Debug for WASM
         run: cargo build --package binius_field --target wasm32-unknown-unknown
+
+  build-debug-stable:
+    name: Build Debug Stable
+    runs-on: ${{ matrix.runner }}
+    container: rustlang/rust:1.83.0
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            cache-key: ubuntu-amd64
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            cache-key: ubuntu-arm64
+    continue-on-error: true
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo
+      RUST_BACKTRACE: "full"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cargo/registry/index/
+            ${{ github.workspace }}/.cargo/registry/cache/
+            ${{ github.workspace }}/.cargo/git/db/
+          key: ${{ matrix.cache-key }}-cargo-stable-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ matrix.cache-key }}-cargo-stable-
+
+      - name: Workaround for rustup issue #2886
+        run: rustup set auto-self-update disable
+
+      - name: Install Rust Toolchain 1.83.0
+        run: rustup toolchain install 1.83.0
+
+      - name: Build Debug (Stable)
+        run: cargo +1.83.0 build --tests --benches --examples -p binius_core --features stable_only
