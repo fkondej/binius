@@ -1,0 +1,81 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-debug-amd:
+    name: Build Debug AMD
+    runs-on: ubuntu-latest
+    container: rustlang/rust:nightly
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Cargo Dependencies and Build Artifacts (AMD)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-amd64-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-amd64-cargo-
+
+      - name: Build Debug (AMD)
+        run: cargo build --tests --benches --examples
+
+      - name: Upload Cargo.lock as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cargo.lock
+          path: Cargo.lock
+          retention-days: 1
+
+      - name: Upload Compiled Binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-build-artifacts-amd
+          path: target
+          retention-days: 1
+
+  unit-test-amd-portable:
+    name: Unit Test AMD Portable
+    runs-on: ubuntu-latest
+    container: rustlang/rust:nightly
+    needs: [build-debug-amd]  # Tests run only after build completes
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Cargo Dependencies and Build Artifacts (AMD)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-amd64-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-amd64-cargo-
+
+      - name: Download Cargo.lock
+        uses: actions/download-artifact@v4
+        with:
+          name: Cargo.lock
+          path: .
+
+      - name: Download Compiled Binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: rust-build-artifacts-amd
+          path: target
+
+      - name: Run Tests and Examples
+        run: RUSTFLAGS="-C target-cpu=generic" ./scripts/run_tests_and_examples.sh
