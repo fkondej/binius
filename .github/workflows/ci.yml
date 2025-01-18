@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  build-debug-amd:
-    name: Build Debug AMD
+  build-debug:
+    name: Build Debug
     runs-on: ${{ matrix.runner }}
     container: rustlang/rust:nightly
     strategy:
@@ -25,7 +25,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Cache Cargo Dependencies and Build Artifacts (AMD)
+      - name: Cache Cargo Dependencies and Build Artifacts
         uses: actions/cache@v4
         with:
           path: |
@@ -40,7 +40,7 @@ jobs:
       - name: Debug Disk Usage After Cache Restore
         run: du -h -d1 .
 
-      - name: Build Debug (AMD)
+      - name: Build Debug
         run: cargo build --tests --benches --examples
 
       # - name: Upload Cargo.lock as Artifact
@@ -53,12 +53,12 @@ jobs:
       # - name: Upload Compiled Binaries
       #   uses: actions/upload-artifact@v4
       #   with:
-      #     name: rust-build-artifacts-amd
+      #     name: rust-build-artifacts-${{ matrix.arch }}
       #     path: target
       #     retention-days: 1
 
-  build-debug-amd-no-cache:
-    name: Build Debug AMD (No Cache)
+  build-debug-no-cache:
+    name: Build Debug (No Cache)
     runs-on: ${{ matrix.runner }}
     container: rustlang/rust:nightly
     strategy:
@@ -73,11 +73,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build Debug (AMD)
+      - name: Build Debug
         run: cargo build --tests --benches --examples
 
-  unit-test-amd-portable:
-    name: Unit Test AMD Portable
+  unit-test-portable:
+    name: Unit Test Portable
     runs-on: ${{ matrix.runner }}
     container: rustlang/rust:nightly
     strategy:
@@ -90,12 +90,12 @@ jobs:
           - arch: arm64
             runner: ubuntu-22.04-arm
             cache-key: ubuntu-arm64
-    needs: [build-debug-amd]  # Tests run only after build completes
+    needs: [build-debug]  # Tests run only after build completes
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Cache Cargo Dependencies and Build Artifacts (AMD)
+      - name: Cache Cargo Dependencies and Build Artifacts
         uses: actions/cache@v4
         with:
           path: |
@@ -119,14 +119,14 @@ jobs:
       # - name: Download Compiled Binaries
       #   uses: actions/download-artifact@v4
       #   with:
-      #     name: rust-build-artifacts-amd
+      #     name: rust-build-artifacts-${{ matrix.arch }}
       #     path: target
 
       - name: Run Tests and Examples
         run: RUSTFLAGS="-C target-cpu=generic" ./scripts/run_tests_and_examples.sh
 
-  unit-test-amd-portable-no-cache:
-    name: Unit Test AMD Portable (No Cache)
+  unit-test-portable-no-cache:
+    name: Unit Test Portable (No Cache)
     runs-on: ${{ matrix.runner }}
     container: rustlang/rust:nightly
     strategy:
@@ -139,7 +139,7 @@ jobs:
           - arch: arm64
             runner: ubuntu-22.04-arm
             cache-key: ubuntu-arm64
-    needs: [build-debug-amd-no-cache]
+    needs: [build-debug-no-cache]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
