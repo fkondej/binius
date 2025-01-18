@@ -25,6 +25,8 @@ jobs:
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo
       RUST_BACKTRACE: "full"
+      CARGO_BUILD_JOBS: 4  # Use all 4 CPUs
+      RUSTFLAGS: "-Ccodegen-units=4"  # Optimize for parallel build
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -56,7 +58,7 @@ jobs:
           find / -type d -name ".cargo" 2>/dev/null | xargs du -sh
 
       - name: Build Debug
-        run: cargo build --tests --benches --examples
+        run: cargo build --tests --benches --examples -j 4
 
       - name: Debug Disk Usage After Build
         run: |
@@ -100,12 +102,14 @@ jobs:
     continue-on-error: true
     env:
       RUST_BACKTRACE: "full"
+      CARGO_BUILD_JOBS: 4  # Use all 4 CPUs
+      RUSTFLAGS: "-Ccodegen-units=4"  # Optimize for parallel build
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Build Debug
-        run: cargo build --tests --benches --examples
+        run: cargo build --tests --benches --examples -j 4
 
   unit-test-portable:
     name: Unit Test Portable
@@ -126,6 +130,8 @@ jobs:
     env:
       CARGO_HOME: ${{ github.workspace }}/.cargo
       RUST_BACKTRACE: "full"
+      CARGO_BUILD_JOBS: 4  # Use all 4 CPUs
+      RUSTFLAGS: "-Ccodegen-units=4"  # Optimize for parallel build
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -202,6 +208,8 @@ jobs:
     continue-on-error: true
     env:
       RUST_BACKTRACE: "full"
+      CARGO_BUILD_JOBS: 4  # Use all 4 CPUs
+      RUSTFLAGS: "-Ccodegen-units=4"  # Optimize for parallel build
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
