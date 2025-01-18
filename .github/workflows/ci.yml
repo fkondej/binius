@@ -40,9 +40,13 @@ jobs:
       - name: Debug Disk Usage After Cache Restore
         run: |
           echo "Current dir usage"
-          du -h -d1 .
+          du -h -d2 .
           echo "Home dir usage"
-          du -h -d1 ~/
+          du -h -d2 ~/
+          echo "$Home dir usage"
+          du -h -d2 $HOME
+          echo "/root dir usage"
+          du -h -d2 /root
 
       - name: Build Debug
         run: cargo build --tests --benches --examples
@@ -50,9 +54,13 @@ jobs:
       - name: Debug Disk Usage After Build
         run: |
           echo "Current dir usage"
-          du -h -d1 .
+          du -h -d2 .
           echo "Home dir usage"
-          du -h -d1 ~/
+          du -h -d2 ~/
+          echo "$Home dir usage"
+          du -h -d2 $HOME
+          echo "/root dir usage"
+          du -h -d2 /root
 
       # - name: Upload Cargo.lock as Artifact
       #   uses: actions/upload-artifact@v4
@@ -121,9 +129,13 @@ jobs:
       - name: Debug Disk Usage After Cache Restore
         run: |
           echo "Current dir usage"
-          du -h -d1 .
+          du -h -d2 .
           echo "Home dir usage"
-          du -h -d1 ~/
+          du -h -d2 ~/
+          echo "$Home dir usage"
+          du -h -d2 $HOME
+          echo "/root dir usage"
+          du -h -d2 /root
 
       # - name: Download Cargo.lock
       #   uses: actions/download-artifact@v4
@@ -143,9 +155,13 @@ jobs:
       - name: Debug Disk Usage After Tests
         run: |
           echo "Current dir usage"
-          du -h -d1 .
+          du -h -d2 .
           echo "Home dir usage"
-          du -h -d1 ~/
+          du -h -d2 ~/
+          echo "$Home dir usage"
+          du -h -d2 $HOME
+          echo "/root dir usage"
+          du -h -d2 /root
 
   unit-test-portable-no-cache:
     name: Unit Test Portable (No Cache)
