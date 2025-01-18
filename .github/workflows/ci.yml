@@ -36,7 +36,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             ${{ matrix.cache-key }}-cargo-
 
@@ -137,7 +137,7 @@ jobs:
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
-          key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             ${{ matrix.cache-key }}-cargo-
 
