@@ -38,10 +38,21 @@ jobs:
             ${{ matrix.cache-key }}-cargo-
 
       - name: Debug Disk Usage After Cache Restore
-        run: du -h -d1 .
+        run: |
+          echo "Current dir usage"
+          du -h -d1 .
+          echo "Home dir usage"
+          du -h -d1 ~/
 
       - name: Build Debug
         run: cargo build --tests --benches --examples
+
+      - name: Debug Disk Usage After Build
+        run: |
+          echo "Current dir usage"
+          du -h -d1 .
+          echo "Home dir usage"
+          du -h -d1 ~/
 
       # - name: Upload Cargo.lock as Artifact
       #   uses: actions/upload-artifact@v4
@@ -108,8 +119,12 @@ jobs:
             ${{ matrix.cache-key }}-cargo-
 
       - name: Debug Disk Usage After Cache Restore
-        run: du -h -d1 .
-        
+        run: |
+          echo "Current dir usage"
+          du -h -d1 .
+          echo "Home dir usage"
+          du -h -d1 ~/
+
       # - name: Download Cargo.lock
       #   uses: actions/download-artifact@v4
       #   with:
@@ -124,6 +139,13 @@ jobs:
 
       - name: Run Tests and Examples
         run: RUSTFLAGS="-C target-cpu=generic" ./scripts/run_tests_and_examples.sh
+
+      - name: Debug Disk Usage After Tests
+        run: |
+          echo "Current dir usage"
+          du -h -d1 .
+          echo "Home dir usage"
+          du -h -d1 ~/
 
   unit-test-portable-no-cache:
     name: Unit Test Portable (No Cache)
