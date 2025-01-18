@@ -33,9 +33,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
+            .cargo/registry/index/
+            .cargo/registry/cache/
+            .cargo/git/db/
           key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             ${{ matrix.cache-key }}-cargo-
@@ -134,9 +134,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
+            .cargo/registry/index/
+            .cargo/registry/cache/
+            .cargo/git/db/
           key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             ${{ matrix.cache-key }}-cargo-
