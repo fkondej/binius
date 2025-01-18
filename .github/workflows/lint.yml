@@ -1,0 +1,19 @@
+name: Lint
+
+on:
+  push:
+    branches: [main, ]
+  pull_request:
+    branches: [main, ]
+
+jobs:
+  copyright-check:
+    name: Copyright Check
+    runs-on: ubuntu-latest
+    container: rustlang/rust:nightly
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Copyright Check
+        run: ./scripts/check_copyright_notice.sh
