@@ -33,9 +33,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            .cargo/registry/index/
-            .cargo/registry/cache/
-            .cargo/git/db/
+            ${{ github.workspace }}/.cargo/registry/index/
+            ${{ github.workspace }}/.cargo/registry/cache/
+            ${{ github.workspace }}/.cargo/git/db/
           key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             ${{ matrix.cache-key }}-cargo-
@@ -134,9 +134,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            .cargo/registry/index/
-            .cargo/registry/cache/
-            .cargo/git/db/
+            ${{ github.workspace }}/.cargo/registry/index/
+            ${{ github.workspace }}/.cargo/registry/cache/
+            ${{ github.workspace }}/.cargo/git/db/
           key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.toml') }}
           restore-keys: |
             ${{ matrix.cache-key }}-cargo-
@@ -208,3 +208,31 @@ jobs:
 
       - name: Run Tests and Examples
         run: RUSTFLAGS="-C target-cpu=generic" ./scripts/run_tests_and_examples.sh
+
+  build-debug-wasm:
+    name: Build Debug WASM
+    runs-on: ubuntu-latest
+    container: rustlang/rust:nightly
+    continue-on-error: true
+    env:
+      RUST_BACKTRACE: "full"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cargo/registry/index/
+            ${{ github.workspace }}/.cargo/registry/cache/
+            ${{ github.workspace }}/.cargo/git/db/
+          key: ${{ runner.os }}-wasm-cargo-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-wasm-cargo-
+
+      - name: Install WASM Target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Build Debug for WASM
+        run: cargo build --package binius_field --target wasm32-unknown-unknown
