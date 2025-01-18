@@ -48,6 +48,10 @@ jobs:
           du -h -d2 $HOME
           echo "/root dir usage"
           du -h -d2 /root
+          echo "ENV"
+          env
+          echo "find"
+          find / -type d -name ".cargo" 2>/dev/null | xargs du -sh
 
       - name: Build Debug
         run: cargo build --tests --benches --examples
@@ -62,6 +66,8 @@ jobs:
           du -h -d2 $HOME
           echo "/root dir usage"
           du -h -d2 /root
+          echo "find"
+          find / -type d -name ".cargo" 2>/dev/null | xargs du -sh
 
       # - name: Upload Cargo.lock as Artifact
       #   uses: actions/upload-artifact@v4
@@ -139,6 +145,10 @@ jobs:
           du -h -d2 $HOME
           echo "/root dir usage"
           du -h -d2 /root
+          echo "ENV"
+          env
+          echo "find"
+          find / -type d -name ".cargo" 2>/dev/null | xargs du -sh
 
       # - name: Download Cargo.lock
       #   uses: actions/download-artifact@v4
@@ -165,6 +175,8 @@ jobs:
           du -h -d2 $HOME
           echo "/root dir usage"
           du -h -d2 /root
+          echo "find"
+          find / -type d -name ".cargo" 2>/dev/null | xargs du -sh
 
   unit-test-portable-no-cache:
     name: Unit Test Portable (No Cache)
