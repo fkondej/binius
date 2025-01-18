@@ -241,7 +241,7 @@ jobs:
   build-debug-stable:
     name: Build Debug Stable
     runs-on: ${{ matrix.runner }}
-    container: rustlang/rust:1.83.0
+    container: rust:1.83.0
     strategy:
       matrix:
         arch: [amd64, arm64]
