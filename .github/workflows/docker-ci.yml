@@ -1,4 +1,4 @@
-name: Build & Publish CI/CD Docker Image
+name: Build CI Docker Images
 
 on:
   push:
