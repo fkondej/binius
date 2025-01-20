@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - ci-migrate-to-gh
     paths:
       - '.github/docker/ci-rust-nightly.Dockerfile'
   workflow_dispatch:  # Allow manual triggering
