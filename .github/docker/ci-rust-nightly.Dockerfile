@@ -6,10 +6,10 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /workspace
 
+ENV RUST_VERSION=
+
 COPY . .
 
 # Build the entire workspace
-RUN cargo build --tests --benches --examples --release
-
-# Cleanup
-RUN rm -rf ./*
+RUN cargo build --tests --benches --examples --release \
+    && rm -rf ./*

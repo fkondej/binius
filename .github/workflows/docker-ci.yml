@@ -39,7 +39,8 @@ jobs:
         with:
           context: .
           file: .github/docker/ci-rust-nightly.Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          # platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
