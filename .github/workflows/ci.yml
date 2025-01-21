@@ -217,6 +217,18 @@ jobs:
       - name: Run Tests and Examples
         run: RUSTFLAGS="-C target-cpu=generic" ./scripts/run_tests_and_examples.sh
 
+  unit-test-portable-new-image:
+    name: Unit Test Portable (No Cache)
+    runs-on: ubuntu-latest
+    container: ghcr.io/fkondej/binius/ci-rust-nightly:latest
+    continue-on-error: true
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Tests and Examples
+        run: RUSTFLAGS="-C target-cpu=generic" ./scripts/run_tests_and_examples.sh
+
   #
   # Target WASM
   #
