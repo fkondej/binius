@@ -1,0 +1,351 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-debug:
+    name: Build Debug
+    runs-on: ${{ matrix.runner }}
+    container: rustlang/rust:nightly
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            cache-key: ubuntu-amd64
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            cache-key: ubuntu-arm64
+    continue-on-error: true
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo
+      RUST_BACKTRACE: "full"
+      CARGO_BUILD_JOBS: 4  # Use all 4 CPUs
+      RUSTFLAGS: "-Ccodegen-units=4"  # Optimize for parallel build
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cargo/registry/index/
+            ${{ github.workspace }}/.cargo/registry/cache/
+            ${{ github.workspace }}/.cargo/git/db/
+          key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ matrix.cache-key }}-cargo-
+
+      - name: Debug Disk Usage After Cache Restore
+        run: |
+          echo "Current dir usage"
+          du -h -d2 .
+          echo "Home dir usage"
+          du -h -d2 ~/
+          echo "$Home dir usage"
+          du -h -d2 $HOME
+          echo "/root dir usage"
+          du -h -d2 /root
+          echo "ENV"
+          env
+          echo "find"
+          find / -type d -name ".cargo" 2>/dev/null | xargs du -sh
+
+      - name: Build Debug
+        run: cargo build --tests --benches --examples -j 4
+
+      - name: Debug Disk Usage After Build
+        run: |
+          echo "Current dir usage"
+          du -h -d2 .
+          echo "Home dir usage"
+          du -h -d2 ~/
+          echo "$Home dir usage"
+          du -h -d2 $HOME
+          echo "/root dir usage"
+          du -h -d2 /root
+          echo "find"
+          find / -type d -name ".cargo" 2>/dev/null | xargs du -sh
+
+      # - name: Upload Cargo.lock as Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Cargo.lock
+      #     path: Cargo.lock
+      #     retention-days: 1
+
+      # - name: Upload Compiled Binaries
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: rust-build-artifacts-${{ matrix.arch }}
+      #     path: target
+      #     retention-days: 1
+
+  build-debug-no-cache:
+    name: Build Debug (No Cache)
+    runs-on: ${{ matrix.runner }}
+    container: rustlang/rust:nightly
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+    continue-on-error: true
+    env:
+      RUST_BACKTRACE: "full"
+      CARGO_BUILD_JOBS: 4  # Use all 4 CPUs
+      RUSTFLAGS: "-Ccodegen-units=4"  # Optimize for parallel build
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Debug
+        run: cargo build --tests --benches --examples -j 4
+
+  unit-test-portable:
+    name: Unit Test Portable
+    runs-on: ${{ matrix.runner }}
+    container: rustlang/rust:nightly
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            cache-key: ubuntu-amd64
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            cache-key: ubuntu-arm64
+    needs: [build-debug]  # Tests run only after build completes
+    continue-on-error: true
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo
+      RUST_BACKTRACE: "full"
+      CARGO_BUILD_JOBS: 4  # Use all 4 CPUs
+      RUSTFLAGS: "-Ccodegen-units=4"  # Optimize for parallel build
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cargo/registry/index/
+            ${{ github.workspace }}/.cargo/registry/cache/
+            ${{ github.workspace }}/.cargo/git/db/
+          key: ${{ matrix.cache-key }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ matrix.cache-key }}-cargo-
+
+      - name: Debug Disk Usage After Cache Restore
+        run: |
+          echo "Current dir usage"
+          du -h -d2 .
+          echo "Home dir usage"
+          du -h -d2 ~/
+          echo "$Home dir usage"
+          du -h -d2 $HOME
+          echo "/root dir usage"
+          du -h -d2 /root
+          echo "ENV"
+          env
+          echo "find"
+          find / -type d -name ".cargo" 2>/dev/null | xargs du -sh
+
+      # - name: Download Cargo.lock
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: Cargo.lock
+      #     path: .
+
+      # - name: Download Compiled Binaries
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: rust-build-artifacts-${{ matrix.arch }}
+      #     path: target
+
+      - name: Run Tests and Examples
+        run: RUSTFLAGS="-C target-cpu=generic" ./scripts/run_tests_and_examples.sh
+
+      - name: Debug Disk Usage After Tests
+        run: |
+          echo "Current dir usage"
+          du -h -d2 .
+          echo "Home dir usage"
+          du -h -d2 ~/
+          echo "$Home dir usage"
+          du -h -d2 $HOME
+          echo "/root dir usage"
+          du -h -d2 /root
+          echo "find"
+          find / -type d -name ".cargo" 2>/dev/null | xargs du -sh
+
+  unit-test-portable-no-cache:
+    name: Unit Test Portable (No Cache)
+    runs-on: ${{ matrix.runner }}
+    container: rustlang/rust:nightly
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            cache-key: ubuntu-amd64
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            cache-key: ubuntu-arm64
+    needs: [build-debug-no-cache]
+    continue-on-error: true
+    env:
+      RUST_BACKTRACE: "full"
+      CARGO_BUILD_JOBS: 4  # Use all 4 CPUs
+      RUSTFLAGS: "-Ccodegen-units=4"  # Optimize for parallel build
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Tests and Examples
+        run: RUSTFLAGS="-C target-cpu=generic" ./scripts/run_tests_and_examples.sh
+
+  unit-test-portable-new-image:
+    name: Unit Test Portable (No Cache)
+    runs-on: ubuntu-latest
+    container: ghcr.io/fkondej/binius/ci-rust-nightly:latest
+    continue-on-error: true
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Tests and Examples
+        run: RUSTFLAGS="-C target-cpu=generic" ./scripts/run_tests_and_examples.sh
+
+  #
+  # Target WASM
+  #
+
+  build-debug-wasm:
+    name: Build Debug WASM
+    runs-on: ubuntu-latest
+    container: rustlang/rust:nightly
+    continue-on-error: true
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo
+      RUST_BACKTRACE: "full"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cargo/registry/index/
+            ${{ github.workspace }}/.cargo/registry/cache/
+            ${{ github.workspace }}/.cargo/git/db/
+          key: ${{ runner.os }}-wasm-cargo-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-wasm-cargo-
+
+      - name: Install WASM Target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Build Debug for WASM
+        run: cargo build --package binius_field --target wasm32-unknown-unknown
+
+  #
+  # RUST Stable: Build + Test
+  #
+
+  build-debug-stable:
+    name: Build Debug Stable
+    runs-on: ${{ matrix.runner }}
+    container: rust:1.83.0
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            cache-key: ubuntu-amd64
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            cache-key: ubuntu-arm64
+    continue-on-error: true
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo
+      RUST_BACKTRACE: "full"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cargo/registry/index/
+            ${{ github.workspace }}/.cargo/registry/cache/
+            ${{ github.workspace }}/.cargo/git/db/
+          key: ${{ matrix.cache-key }}-cargo-stable-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ matrix.cache-key }}-cargo-stable-
+
+      - name: Workaround for rustup issue #2886
+        run: rustup set auto-self-update disable
+
+      - name: Install Rust Toolchain 1.83.0
+        run: rustup toolchain install 1.83.0
+
+      - name: Build Debug (Stable)
+        run: cargo +1.83.0 build --tests --benches --examples -p binius_core --features stable_only
+
+  unit-test-stable:
+    name: Unit Test Stable
+    runs-on: ${{ matrix.runner }}
+    container: rust:1.83.0
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            cache-key: ubuntu-amd64
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+            cache-key: ubuntu-arm64
+    continue-on-error: true
+    env:
+      CARGO_HOME: ${{ github.workspace }}/.cargo
+      RUST_BACKTRACE: "full"
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Cache Cargo Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cargo/registry/index/
+            ${{ github.workspace }}/.cargo/registry/cache/
+            ${{ github.workspace }}/.cargo/git/db/
+          key: ${{ matrix.cache-key }}-cargo-stable-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ matrix.cache-key }}-cargo-stable-
+
+      - name: Workaround for rustup issue #2886
+        run: rustup set auto-self-update disable
+
+      - name: Install Rust Toolchain 1.83.0
+        run: rustup toolchain install 1.83.0
+      
+      - name: Run Tests and Examples (Stable)
+        run: RUSTFLAGS="-C target-cpu=native" CARGO_STABLE=true ./scripts/run_tests_and_examples.sh
